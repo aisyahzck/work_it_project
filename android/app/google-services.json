@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "580260857517",
+    "project_id": "workit-project-a8f18",
+    "storage_bucket": "workit-project-a8f18.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580260857517:android:1489cbff15b6e8c3b4e824",
+        "android_client_info": {
+          "package_name": "com.aisyah.work_it_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "580260857517-iqakskq9rllbufqjtmduvg0qu155eeuf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7anI8Vk6Rf82pjkMcFmCBu95__S7DUfM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "580260857517-iqakskq9rllbufqjtmduvg0qu155eeuf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
