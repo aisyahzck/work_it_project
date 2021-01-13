@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:work_it_project/credits.dart';
+import 'file:///C:/Users/sitia/AndroidStudioProjects/work_it_project/lib/ui/home.dart';
 import 'package:work_it_project/services/auth.dart';
 import 'package:work_it_project/ui/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';

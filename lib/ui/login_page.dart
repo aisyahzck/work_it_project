@@ -3,12 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/auth_strings.dart';
-import 'package:work_it_project/credits.dart';
+import 'file:///C:/Users/sitia/AndroidStudioProjects/work_it_project/lib/ui/home.dart';
 import 'package:work_it_project/services/auth.dart';
 import 'package:work_it_project/style/theme.dart' as Theme;
 import 'package:work_it_project/utils/bubble_indication_painter.dart';
 
-import 'package:work_it_project/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -42,8 +41,7 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupEmailController = new TextEditingController();
   TextEditingController signupNameController = new TextEditingController();
   TextEditingController signupPasswordController = new TextEditingController();
-  TextEditingController signupConfirmPasswordController =
-      new TextEditingController();
+  TextEditingController signupConfirmPasswordController = new TextEditingController();
 
   PageController _pageController;
 
@@ -57,7 +55,7 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    return loading ? Loading() : Scaffold(
+    return new Scaffold(
       key: _scaffoldKey,
       body: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
@@ -393,9 +391,9 @@ class _LoginPageState extends State<LoginPage>
                   height: 1.0,
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 15.0, right: 15.0),
+                  padding: EdgeInsets.only(left: 10.0, right: 10.0, bottom: 5.0),
                   child: Text(
-                    "Fingerprint",
+                    "Fingerprint Scan",
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16.0,
@@ -420,44 +418,21 @@ class _LoginPageState extends State<LoginPage>
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 30.0, right: 40.0),
-                child: GestureDetector(
-                  onTap: () => showInSnackBar("Facebook button pressed"),
-                  child: Container(
-                    padding: const EdgeInsets.all(15.0),
-                    decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: new Icon(
-                      FontAwesomeIcons.facebookF,
-                      color: Color(0xFF0084ff),
-                    ),
+          Padding(
+              padding: EdgeInsets.only(left: 15.0, right: 15.0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  IconButton(icon: Icon(Icons.fingerprint, size: 70, color: Colors.blueAccent[700]),
+                    onPressed: () {
+                    _startAuth();
+                  },
+                  iconSize: 70,
                   ),
-                ),
+                  SizedBox(height: 20),
+
+                ],
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: GestureDetector(
-                  onTap: () => showInSnackBar("Google button pressed"),
-                  child: Container(
-                    padding: const EdgeInsets.all(15.0),
-                    decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: new Icon(
-                      FontAwesomeIcons.google,
-                      color: Color(0xFF0084ff),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ],
       ),
@@ -741,7 +716,6 @@ class _LoginPageState extends State<LoginPage>
 
     if (_isAuthenticated) {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => HomePage()));
-
     }
   }
 }
