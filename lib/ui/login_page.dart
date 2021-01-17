@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,9 +7,8 @@ import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/auth_strings.dart';
 import 'package:work_it_project/services/auth.dart';
 import 'package:work_it_project/style/theme.dart' as Theme;
+import 'package:work_it_project/ui/home.dart';
 import 'package:work_it_project/utils/bubble_indication_painter.dart';
-
-import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   final Function toggleView;
@@ -19,7 +19,8 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => new _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   final FocusNode myFocusNodeEmailLogin = FocusNode();
@@ -40,7 +41,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   TextEditingController signupNameController = new TextEditingController();
   TextEditingController signupPasswordController = new TextEditingController();
   TextEditingController signupConfirmPasswordController =
-      new TextEditingController();
+  new TextEditingController();
 
   PageController _pageController;
 
@@ -55,11 +56,61 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   bool _touchID = false;
   bool saveAttempted = false;
 
+  void _signIn({String email, String password}) {
+    _auth.signInWithEmailAndPassword(email: email, password: password).then((authResult) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+    }).catchError((e) {
+      print(e);
+      print(e.code);
+
+      if (e.code == 'wrong-password') {
+        showCupertinoDialog(
+            context: context,
+            builder: (context) {
+              return CupertinoAlertDialog(
+                title: Text(
+                    'Incorrect password. Try again'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              );
+            });
+      }
+    });
+  }
+
   void createUser({String email, String pw}) {
-    _auth.createUserWithEmailAndPassword(email: email, password: pw).then((authResult) {
+    _auth.createUserWithEmailAndPassword(email: email, password: pw).then((
+        authResult) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
       print('Yay! ${authResult.user}');
     }).catchError((e) {
       print(e);
+      print(e.code);
+
+      if (e.code == 'email-already-in-use') {
+        showCupertinoDialog(
+            context: context,
+            builder: (context) {
+              return CupertinoAlertDialog(
+                title: Text(
+                    'This email already has an account associated with it'),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              );
+            });
+      }
     });
   }
 
@@ -73,9 +124,18 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         },
         child: SingleChildScrollView(
           child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height >= 775.0
-                ? MediaQuery.of(context).size.height
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
+            height: MediaQuery
+                .of(context)
+                .size
+                .height >= 775.0
+                ? MediaQuery
+                .of(context)
+                .size
+                .height
                 : 775.0,
             decoration: new BoxDecoration(
               gradient: new LinearGradient(
@@ -276,6 +336,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
+                          onChanged: (textVal) {
+                            setState(() {
+                              email = textVal;
+                            });
+                          },
                           focusNode: myFocusNodeEmailLogin,
                           controller: loginEmailController,
                           keyboardType: TextInputType.emailAddress,
@@ -305,6 +370,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
+                          onChanged: (textVal) {
+                            setState(() {
+                              password = textVal;
+                            });
+                          },
                           focusNode: myFocusNodePasswordLogin,
                           controller: loginPasswordController,
                           obscureText: _obscureTextLogin,
@@ -382,15 +452,13 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       ),
                     ),
                     onPressed: () {
-                      context.read<AuthService>().signIn(
-                          email: loginEmailController.text.trim(),
-                          password: loginPasswordController.text.trim());
+                      _signIn(email: email, password: password);
                     }),
               ),
             ],
           ),
           Padding(
-            padding: EdgeInsets.only(left: 95.0 , top: 10.0),
+            padding: EdgeInsets.only(left: 95.0, top: 10.0),
             child: Row(
               children: [
                 Checkbox(
@@ -477,21 +545,19 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     key: formKey,
                     child: Container(
                       width: 300.0,
-                      height: 360.0,
-                      child: ListView(
+                      height: 300.0,
+                      child: Column(
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.only(
-                                top: 0.0, bottom: 15.0, left: 25.0, right: 25.0),
+                                top: 10.0,
+                                bottom: 15.0,
+                                left: 25.0,
+                                right: 25.0),
                             child: TextFormField(
                               autovalidate: saveAttempted,
-                              onChanged: (textValue) {
-                                setState(() {
-                                  name = textValue;
-                                });
-                              },
                               validator: (nameValue) {
-                                if (nameValue.isEmpty){
+                                if (nameValue.isEmpty) {
                                   return 'This field is mandatory.';
                                 }
                                 return null;
@@ -512,7 +578,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 ),
                                 hintText: "Name",
                                 hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold", fontSize: 16.0),
+                                    fontFamily: "WorkSansSemiBold",
+                                    fontSize: 16.0),
                               ),
                             ),
                           ),
@@ -523,7 +590,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           ),
                           Padding(
                             padding: EdgeInsets.only(
-                                top: 15.0, bottom: 15.0, left: 25.0, right: 25.0),
+                                top: 15.0,
+                                bottom: 15.0,
+                                left: 25.0,
+                                right: 25.0),
                             child: TextFormField(
                               autovalidate: saveAttempted,
                               onChanged: (textValue) {
@@ -532,7 +602,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 });
                               },
                               validator: (emailValue) {
-                                if (emailValue.isEmpty){
+                                if (emailValue.isEmpty) {
                                   return 'This field is mandatory.';
                                 }
                                 String f = "[a-zA-Z0-9\+\.\_\%\-\+]{1,256}" +
@@ -566,7 +636,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 ),
                                 hintText: "Email Address",
                                 hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold", fontSize: 16.0),
+                                    fontFamily: "WorkSansSemiBold",
+                                    fontSize: 16.0),
                               ),
                             ),
                           ),
@@ -577,7 +648,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           ),
                           Padding(
                             padding: EdgeInsets.only(
-                                top: 15.0, bottom: 15.0, left: 25.0, right: 25.0),
+                                top: 15.0,
+                                bottom: 15.0,
+                                left: 25.0,
+                                right: 25.0),
                             child: TextFormField(
                               autovalidate: saveAttempted,
                               onChanged: (textValue) {
@@ -586,7 +660,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 });
                               },
                               validator: (pwValue) {
-                                if (pwValue.isEmpty){
+                                if (pwValue.isEmpty) {
                                   return 'This field is mandatory.';
                                 }
 
@@ -611,7 +685,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                                 ),
                                 hintText: "Password",
                                 hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold", fontSize: 16.0),
+                                    fontFamily: "WorkSansSemiBold",
+                                    fontSize: 16.0),
                                 suffixIcon: GestureDetector(
                                   onTap: _toggleSignup,
                                   child: Icon(
@@ -630,57 +705,13 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                             height: 1.0,
                             color: Colors.grey[400],
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 15.0, bottom: 40.0, left: 25.0, right: 25.0),
-                            child: TextFormField(
-                              autovalidate: saveAttempted,
-                              onChanged: (textValue) {
-                                setState(() {
-                                  confirmPassword = textValue;
-                                });
-                              },
-                              validator: (pwConfirmValue) {
-                                if (pwConfirmValue != password){
-                                  return 'Password does not match.';
-                                }
-                                return null;
-                              },
-                              controller: signupConfirmPasswordController,
-                              obscureText: _obscureTextSignupConfirm,
-                              style: TextStyle(
-                                  fontFamily: "WorkSansSemiBold",
-                                  fontSize: 16.0,
-                                  color: Colors.black),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: Icon(
-                                  FontAwesomeIcons.lock,
-                                  color: Colors.black,
-                                ),
-                                hintText: "Confirmation",
-                                hintStyle: TextStyle(
-                                    fontFamily: "WorkSansSemiBold", fontSize: 16.0),
-                                suffixIcon: GestureDetector(
-                                  onTap: _toggleSignupConfirm,
-                                  child: Icon(
-                                    _obscureTextSignupConfirm
-                                        ? FontAwesomeIcons.eye
-                                        : FontAwesomeIcons.eyeSlash,
-                                    size: 15.0,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 340.0),
+                  margin: EdgeInsets.only(top: 300.0),
                   decoration: new BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(5.0)),
                     boxShadow: <BoxShadow>[
