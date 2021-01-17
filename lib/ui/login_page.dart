@@ -3,9 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:local_auth/auth_strings.dart';
-import 'package:work_it_project/services/auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:work_it_project/style/theme.dart' as Theme;
 import 'package:work_it_project/ui/home.dart';
 import 'package:work_it_project/utils/bubble_indication_painter.dart';
@@ -55,10 +54,14 @@ class _LoginPageState extends State<LoginPage>
 
   bool _touchID = false;
   bool saveAttempted = false;
+  final googleSignIn = GoogleSignIn();
 
   void _signIn({String email, String password}) {
-    _auth.signInWithEmailAndPassword(email: email, password: password).then((authResult) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+    _auth
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((authResult) {
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) => HomePage()));
     }).catchError((e) {
       print(e);
       print(e.code);
@@ -68,8 +71,7 @@ class _LoginPageState extends State<LoginPage>
             context: context,
             builder: (context) {
               return CupertinoAlertDialog(
-                title: Text(
-                    'Incorrect password. Try again'),
+                title: Text('Incorrect password. Try again'),
                 actions: <Widget>[
                   CupertinoDialogAction(
                     child: Text('OK'),
@@ -85,9 +87,11 @@ class _LoginPageState extends State<LoginPage>
   }
 
   void createUser({String email, String pw}) {
-    _auth.createUserWithEmailAndPassword(email: email, password: pw).then((
-        authResult) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+    _auth
+        .createUserWithEmailAndPassword(email: email, password: pw)
+        .then((authResult) {
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) => HomePage()));
       print('Yay! ${authResult.user}');
     }).catchError((e) {
       print(e);
@@ -504,7 +508,15 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Google button pressed"),
+                  onTap: () {
+                    signInGoogle().whenComplete(() async {
+                      User user = await FirebaseAuth.instance
+                          .currentUser;
+
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (context) => HomePage()));
+                    });
+                  },
                   child: Container(
                     padding: const EdgeInsets.all(20.0),
                     decoration: new BoxDecoration(
@@ -795,4 +807,26 @@ class _LoginPageState extends State<LoginPage>
       _obscureTextSignupConfirm = !_obscureTextSignupConfirm;
     });
   }
+
+  Future<String> signInGoogle() async {
+    GoogleSignInAccount googleSignInAccountAcc = await googleSignIn.signIn();
+
+    if (GoogleSignInAccount != null) {
+      GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccountAcc.authentication;
+
+      AuthCredential credential = GoogleAuthProvider.getCredential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+
+      UserCredential result = await _auth.signInWithCredential(credential);
+
+      User user  = await _auth.currentUser;
+      print(user.uid);
+
+      return Future.value('true');
+    }
+    return 'Signed in via google account is completed';
+  }
+
 }
