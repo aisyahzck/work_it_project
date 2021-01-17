@@ -8,4 +8,4 @@ User can sign in via:
 1) Email
 2) Facebook Account
 3) Google Account
-4) Fingerprint Scan
+4) Fingerprint Scan (on going)
