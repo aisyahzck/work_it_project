@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:work_it_project/style/theme.dart' as Theme;
 import 'package:work_it_project/ui/home.dart';
@@ -34,7 +36,6 @@ class _LoginPageState extends State<LoginPage>
 
   bool _obscureTextLogin = true;
   bool _obscureTextSignup = true;
-  bool _obscureTextSignupConfirm = true;
 
   TextEditingController signupEmailController = new TextEditingController();
   TextEditingController signupNameController = new TextEditingController();
@@ -491,7 +492,7 @@ class _LoginPageState extends State<LoginPage>
               Padding(
                 padding: EdgeInsets.only(top: 10.0, right: 30.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Facebook button pressed"),
+                  onTap: () => _signInFacebook(),
                   child: Container(
                     padding: const EdgeInsets.all(20.0),
                     decoration: new BoxDecoration(
@@ -802,12 +803,6 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
-  void _toggleSignupConfirm() {
-    setState(() {
-      _obscureTextSignupConfirm = !_obscureTextSignupConfirm;
-    });
-  }
-
   Future<String> signInGoogle() async {
     GoogleSignInAccount googleSignInAccountAcc = await googleSignIn.signIn();
 
@@ -828,5 +823,21 @@ class _LoginPageState extends State<LoginPage>
     }
     return 'Signed in via google account is completed';
   }
+
+void _signInFacebook() async {
+  FacebookLogin facebookLogin = FacebookLogin();
+
+  final result = await facebookLogin.logIn(['email']);
+  final token = result.accessToken.token;
+  final graphResponse = await http.get(
+      'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name&access_token=${token}');
+  print(graphResponse.body);
+  if (result.status == FacebookLoginStatus.loggedIn) {
+    final credential = FacebookAuthProvider.getCredential(token);
+    _auth.signInWithCredential(credential);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => HomePage()));
+  }
+}
 
 }
