@@ -6,10 +6,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'package:scoped_model/scoped_model.dart';
+import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
 
 import 'package:work_it_project/style/theme.dart' as Theme;
-import 'package:work_it_project/ui/home.dart';
+import 'package:work_it_project/todo/homepage.dart';
 import 'package:work_it_project/utils/bubble_indication_painter.dart';
+import 'package:local_auth/local_auth.dart';
 
 class LoginPage extends StatefulWidget {
   final Function toggleView;
@@ -61,8 +64,10 @@ class _LoginPageState extends State<LoginPage>
     _auth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((authResult) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => MyHomePage()));
     }).catchError((e) {
       print(e);
       print(e.code);
@@ -91,8 +96,10 @@ class _LoginPageState extends State<LoginPage>
     _auth
         .createUserWithEmailAndPassword(email: email, password: pw)
         .then((authResult) {
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) => MyHomePage()));
       print('Yay! ${authResult.user}');
     }).catchError((e) {
       print(e);
@@ -121,6 +128,7 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
+
     return new Scaffold(
       key: _scaffoldKey,
       body: NotificationListener<OverscrollIndicatorNotification>(
@@ -511,11 +519,10 @@ class _LoginPageState extends State<LoginPage>
                 child: GestureDetector(
                   onTap: () {
                     signInGoogle().whenComplete(() async {
-                      User user = await FirebaseAuth.instance
-                          .currentUser;
+                      User user = await FirebaseAuth.instance.currentUser;
 
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => HomePage()));
+                          builder: (context) => MyHomePage()));
                     });
                   },
                   child: Container(
@@ -569,6 +576,11 @@ class _LoginPageState extends State<LoginPage>
                                 right: 25.0),
                             child: TextFormField(
                               autovalidate: saveAttempted,
+                              onChanged: (textValue) {
+                                setState(() {
+                                  name = textValue;
+                                });
+                              },
                               validator: (nameValue) {
                                 if (nameValue.isEmpty) {
                                   return 'This field is mandatory.';
@@ -816,7 +828,7 @@ class _LoginPageState extends State<LoginPage>
 
       UserCredential result = await _auth.signInWithCredential(credential);
 
-      User user  = await _auth.currentUser;
+      User user = await _auth.currentUser;
       print(user.uid);
 
       return Future.value('true');
@@ -824,20 +836,21 @@ class _LoginPageState extends State<LoginPage>
     return 'Signed in via google account is completed';
   }
 
-void _signInFacebook() async {
-  FacebookLogin facebookLogin = FacebookLogin();
+  void _signInFacebook() async {
+    FacebookLogin facebookLogin = FacebookLogin();
 
-  final result = await facebookLogin.logIn(['email']);
-  final token = result.accessToken.token;
-  final graphResponse = await http.get(
-      'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name&access_token=${token}');
-  print(graphResponse.body);
-  if (result.status == FacebookLoginStatus.loggedIn) {
-    final credential = FacebookAuthProvider.getCredential(token);
-    _auth.signInWithCredential(credential);
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => HomePage()));
+    final result = await facebookLogin.logIn(['email']);
+    final token = result.accessToken.token;
+    final graphResponse = await http.get(
+        'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name&access_token=${token}');
+    print(graphResponse.body);
+    if (result.status == FacebookLoginStatus.loggedIn) {
+      final credential = FacebookAuthProvider.getCredential(token);
+      _auth.signInWithCredential(credential).then((authResult) =>
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => MyHomePage())
+          )
+      );
+    }
   }
-}
-
 }

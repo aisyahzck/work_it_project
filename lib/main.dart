@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:work_it_project/ui/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,13 +15,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primaryColor: Colors.white,
+    return ScopedModel<TodoListModel>(
+      model: TodoListModel(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: Colors.white,
+        ),
+        home: LoginPage(),
       ),
-      home: LoginPage(),
     );
+
   }
 }
