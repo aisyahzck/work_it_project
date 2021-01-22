@@ -6,8 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
-import 'package:scoped_model/scoped_model.dart';
-import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
 
 import 'package:work_it_project/style/theme.dart' as Theme;
 import 'package:work_it_project/todo/homepage.dart';

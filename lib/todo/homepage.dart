@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -75,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage>
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   PageController _pageController;
   int _currentPageIndex = 0;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
