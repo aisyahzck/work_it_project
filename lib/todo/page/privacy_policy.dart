@@ -22,13 +22,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
   }
 
   static const _PRIVACY_POLICY = """
- **Credits**
-
-Freepik 
-
-Sabin Bajracharya
-
-huextrat
   
 **Information Collection and Use**
 
@@ -45,9 +38,22 @@ We value your trust in providing us your Personal Information, thus we are striv
 
 This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by us. Therefore, I strongly advise you to review the Privacy Policy of these websites. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
 
-**Contact Us**
 
+**Credits**
+
+Freepik 
+Sabin Bajracharya 
+huextrat
+
+
+
+
+
+**Contact Us** 
 sitiaaz@yahoo.com.my
+
+
+
 
 
 """;
