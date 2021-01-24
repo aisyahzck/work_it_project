@@ -2,7 +2,7 @@
 A flutter private to-do list application. 
 
 # TO-DO App
-User will be asked to sign up before start using the app.
+Sign up before start using the app.
 
 User can sign in via:
 1) Email
