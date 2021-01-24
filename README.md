@@ -8,5 +8,5 @@ User can sign in via:
 1) Email
 2) Fingerprint Scan
 
-#TO-DO Application
+# TO-DO Application
 
