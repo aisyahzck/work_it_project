@@ -9,4 +9,5 @@ class Choice {
 
 const List<Choice> choices = const <Choice>[
   const Choice(title: 'Privacy Policy', icon: Icons.vpn_key),
+  const Choice(title: 'Sign Out', icon: Icons.account_circle),
 ];

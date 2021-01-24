@@ -1,15 +1,19 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'package:work_it_project/services/auth.dart';
 
-import 'package:work_it_project/style/theme.dart' as Theme;
+import 'package:work_it_project/theme.dart' as Theme;
 import 'package:work_it_project/todo/homepage.dart';
-import 'package:work_it_project/utils/bubble_indication_painter.dart';
+import 'package:work_it_project/bubble_indication_painter.dart';
 import 'package:local_auth/local_auth.dart';
 
 class LoginPage extends StatefulWidget {
@@ -42,7 +46,7 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupNameController = new TextEditingController();
   TextEditingController signupPasswordController = new TextEditingController();
   TextEditingController signupConfirmPasswordController =
-  new TextEditingController();
+      new TextEditingController();
 
   PageController _pageController;
 
@@ -51,9 +55,11 @@ class _LoginPageState extends State<LoginPage>
   bool loading = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final LocalAuthentication auth = LocalAuthentication();
+  final FlutterSecureStorage storage = FlutterSecureStorage();
+  bool userHasTouchId = false;
   String name, email, password, confirmPassword;
   final formKey = GlobalKey<FormState>();
-
   bool _touchID = false;
   bool saveAttempted = false;
   final googleSignIn = GoogleSignIn();
@@ -62,10 +68,14 @@ class _LoginPageState extends State<LoginPage>
     _auth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((authResult) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => MyHomePage()));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) {
+        return MyHomePage(
+          user: authResult.user,
+          wantsTouchId: _touchID,
+          password: password,
+        );
+      }));
     }).catchError((e) {
       print(e);
       print(e.code);
@@ -94,10 +104,14 @@ class _LoginPageState extends State<LoginPage>
     _auth
         .createUserWithEmailAndPassword(email: email, password: pw)
         .then((authResult) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => MyHomePage()));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (BuildContext context) {
+        return MyHomePage(
+          user: authResult.user,
+          wantsTouchId: _touchID,
+          password: password,
+        );
+      }));
       print('Yay! ${authResult.user}');
     }).catchError((e) {
       print(e);
@@ -126,7 +140,6 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-
     return new Scaffold(
       key: _scaffoldKey,
       body: NotificationListener<OverscrollIndicatorNotification>(
@@ -135,18 +148,9 @@ class _LoginPageState extends State<LoginPage>
         },
         child: SingleChildScrollView(
           child: Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height >= 775.0
-                ? MediaQuery
-                .of(context)
-                .size
-                .height
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height >= 775.0
+                ? MediaQuery.of(context).size.height
                 : 775.0,
             decoration: new BoxDecoration(
               gradient: new LinearGradient(
@@ -250,12 +254,47 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
 
+    getSecureStorage();
+
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
 
     _pageController = PageController();
+  }
+
+  void getSecureStorage() async {
+    final isUsingBio = await storage.read(key: 'usingBiometric');
+    setState(() {
+      userHasTouchId = isUsingBio == 'true';
+    });
+  }
+
+  void authenticate() async {
+    final canCheck = await auth.canCheckBiometrics;
+
+    if (canCheck) {
+      List<BiometricType> availableBiometrics =
+          await auth.getAvailableBiometrics();
+
+      if (Platform.isAndroid || Platform.isIOS) {
+        if (availableBiometrics.contains(BiometricType.fingerprint)) {
+          final authenticated = await auth.authenticateWithBiometrics(
+              localizedReason: 'Enable Fingerprint ID to sign in more easily');
+
+          if (authenticated) {
+            final userStoredEmail = await storage.read(key: 'email');
+            final userStoredPassword = await storage.read(key: 'password');
+
+            _signIn(email: userStoredEmail, password: userStoredPassword);
+            print('Bio checked');
+          }
+        }
+      }
+    } else {
+      print('cant check');
+    }
   }
 
   void showInSnackBar(String value) {
@@ -468,29 +507,48 @@ class _LoginPageState extends State<LoginPage>
               ),
             ],
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 95.0, top: 10.0),
-            child: Row(
-              children: [
-                Checkbox(
-                    activeColor: Colors.orangeAccent,
-                    value: _touchID,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _touchID = newValue;
-                      });
-                    }),
-                Text(
-                  "Use Fingerprint ID",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: "WorkSansBold",
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w200,
-                  ),
+          userHasTouchId
+              ? InkWell(
+                  onTap: () => authenticate(),
+                  child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(
+                          color: Colors.purple,
+                          width: 2.0,
+                        ),
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      padding: EdgeInsets.all(10.0),
+                      child: Icon(
+                        FontAwesomeIcons.fingerprint,
+                        size: 30,
+                      )),
                 )
-              ],
-            ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                      Checkbox(
+                        activeColor: Colors.orange,
+                        value: _touchID,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _touchID = newValue;
+                          });
+                        },
+                      ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    Text(
+                      'Use Touch ID',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "WorkSansSemiBold",
+                        fontSize: 16.0,
+                      ),
+                    )
+                  ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -519,8 +577,14 @@ class _LoginPageState extends State<LoginPage>
                     signInGoogle().whenComplete(() async {
                       User user = await FirebaseAuth.instance.currentUser;
 
-                      Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (context) => MyHomePage()));
+                      Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return MyHomePage(
+                          user: user,
+                          wantsTouchId: _touchID,
+                          password: password,
+                        );
+                      }));
                     });
                   },
                   child: Container(
@@ -818,7 +882,7 @@ class _LoginPageState extends State<LoginPage>
 
     if (GoogleSignInAccount != null) {
       GoogleSignInAuthentication googleSignInAuthentication =
-      await googleSignInAccountAcc.authentication;
+          await googleSignInAccountAcc.authentication;
 
       AuthCredential credential = GoogleAuthProvider.getCredential(
           idToken: googleSignInAuthentication.idToken,
@@ -845,10 +909,14 @@ class _LoginPageState extends State<LoginPage>
     if (result.status == FacebookLoginStatus.loggedIn) {
       final credential = FacebookAuthProvider.getCredential(token);
       _auth.signInWithCredential(credential).then((authResult) =>
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => MyHomePage())
-          )
-      );
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return MyHomePage(
+              user: authResult.user,
+              wantsTouchId: _touchID,
+              password: password,
+            );
+          })));
     }
   }
 }

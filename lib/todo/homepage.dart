@@ -1,6 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:work_it_project/login.dart';
+import 'package:work_it_project/services/auth.dart';
+import 'dart:io';
 
 import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
 import 'package:work_it_project/todo/gradient_background.dart';
@@ -47,7 +53,11 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  final User user;
+  final bool wantsTouchId;
+  final String password;
+
+  MyHomePage({Key key, this.title, @required this.user, @required this.wantsTouchId, @required this.password}) : super(key: key);
 
   final String title;
 
@@ -76,17 +86,48 @@ class _MyHomePageState extends State<MyHomePage>
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   PageController _pageController;
   int _currentPageIndex = 0;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final LocalAuthentication auth = LocalAuthentication();
+  final storage = FlutterSecureStorage();
+  User user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.wantsTouchId) {
+      authenticate();
+    }
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 300),
     );
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
     _pageController = PageController(initialPage: 0, viewportFraction: 0.8);
+  }
+
+  void authenticate() async {
+    final canCheck = await auth.canCheckBiometrics;
+
+    if (canCheck) {
+      List<BiometricType> availableBiometrics =
+      await auth.getAvailableBiometrics();
+
+      if (Platform.isAndroid || Platform.isIOS) {
+        if (availableBiometrics.contains(BiometricType.fingerprint)) {
+          final authenticated = await auth.authenticateWithBiometrics(
+              localizedReason: 'Enable Fingerprint ID to sign in more easily');
+          if (authenticated) {
+            storage.write(key: 'email', value: widget.user.email);
+            storage.write(key: 'password', value: widget.password);
+            storage.write(key: 'usingBiometric', value: 'true');
+          }
+        }
+      }
+    } else {
+      print('cannot check');
+    }
   }
 
   @override
@@ -111,12 +152,29 @@ class _MyHomePageState extends State<MyHomePage>
             centerTitle: true,
             elevation: 0.0,
             backgroundColor: Colors.transparent,
-            actions: [
+            actions: <Widget> [
               PopupMenuButton<Choice>(
                 onSelected: (choice) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          PrivacyPolicyScreen()));
+                  setState(() async {
+                    if (choice.title == 'Privacy Policy'){
+                      print(' USER IS $user');
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              PrivacyPolicyScreen()));
+                    } else if (choice.title == 'Sign Out'){
+                      // sign out
+                      print('SIGN OUT BUTTON');
+                      FirebaseAuth.instance.signOut().then((value) => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              LoginPage())));
+                      print('USER IS $user');
+                      if (user == null) {
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                LoginPage()));
+                      }
+                    }
+                  });
                 },
                 itemBuilder: (BuildContext context) {
                   return choices.map((Choice choice) {

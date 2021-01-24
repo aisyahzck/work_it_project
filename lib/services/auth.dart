@@ -13,7 +13,7 @@ class AuthService {
     User user = await _auth.currentUser;
 
     if (user.providerData[1].providerId == 'google.com') {
-      await googleSignIn.disconnect();
+      await googleSignIn.signOut();
     }
 
     await _auth.signOut();
