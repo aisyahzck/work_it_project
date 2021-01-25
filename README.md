@@ -6,9 +6,8 @@ Sign up before start using the app.
 
 User can sign in via:
 1) Email
-2) Google Account
-3) Facebook Account
-4) Fingerprint Scan
+2) Facebook Account
+3) Fingerprint Scan
 
 
 
