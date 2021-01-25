@@ -1,12 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:work_it_project/login.dart';
-import 'package:work_it_project/services/auth.dart';
-import 'dart:io';
 
 import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
 import 'package:work_it_project/todo/gradient_background.dart';
@@ -54,10 +50,9 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final User user;
-  final bool wantsTouchId;
   final String password;
 
-  MyHomePage({Key key, this.title, @required this.user, @required this.wantsTouchId, @required this.password}) : super(key: key);
+  MyHomePage({Key key, this.title, @required this.user, @required this.password}) : super(key: key);
 
   final String title;
 
@@ -88,16 +83,11 @@ class _MyHomePageState extends State<MyHomePage>
   int _currentPageIndex = 0;
 
   final LocalAuthentication auth = LocalAuthentication();
-  final storage = FlutterSecureStorage();
   User user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-
-    if (widget.wantsTouchId) {
-      authenticate();
-    }
 
     _controller = AnimationController(
       vsync: this,
@@ -107,28 +97,6 @@ class _MyHomePageState extends State<MyHomePage>
     _pageController = PageController(initialPage: 0, viewportFraction: 0.8);
   }
 
-  void authenticate() async {
-    final canCheck = await auth.canCheckBiometrics;
-
-    if (canCheck) {
-      List<BiometricType> availableBiometrics =
-      await auth.getAvailableBiometrics();
-
-      if (Platform.isAndroid || Platform.isIOS) {
-        if (availableBiometrics.contains(BiometricType.fingerprint)) {
-          final authenticated = await auth.authenticateWithBiometrics(
-              localizedReason: 'Enable Fingerprint ID to sign in more easily');
-          if (authenticated) {
-            storage.write(key: 'email', value: widget.user.email);
-            storage.write(key: 'password', value: widget.password);
-            storage.write(key: 'usingBiometric', value: 'true');
-          }
-        }
-      }
-    } else {
-      print('cannot check');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

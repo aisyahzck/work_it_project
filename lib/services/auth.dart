@@ -1,21 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
 
   final FirebaseAuth _auth;
   AuthService(this._auth);
   Stream<User> get authStateChanges => _auth.authStateChanges();
-  final googleSignIn = GoogleSignIn();
+
 
   Future<String> signOut () async {
-
-    User user = await _auth.currentUser;
-
-    if (user.providerData[1].providerId == 'google.com') {
-      await googleSignIn.signOut();
-    }
-
     await _auth.signOut();
     return 'Signed out';
   }

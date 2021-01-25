@@ -1,15 +1,11 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
-import 'package:work_it_project/services/auth.dart';
+import 'package:local_auth/auth_strings.dart';
 
 import 'package:work_it_project/theme.dart' as Theme;
 import 'package:work_it_project/todo/homepage.dart';
@@ -45,8 +41,7 @@ class _LoginPageState extends State<LoginPage>
   TextEditingController signupEmailController = new TextEditingController();
   TextEditingController signupNameController = new TextEditingController();
   TextEditingController signupPasswordController = new TextEditingController();
-  TextEditingController signupConfirmPasswordController =
-      new TextEditingController();
+  TextEditingController signupConfirmPasswordController = new TextEditingController();
 
   PageController _pageController;
 
@@ -55,14 +50,64 @@ class _LoginPageState extends State<LoginPage>
   bool loading = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final LocalAuthentication auth = LocalAuthentication();
-  final FlutterSecureStorage storage = FlutterSecureStorage();
+  final LocalAuthentication localAuth = LocalAuthentication();
   bool userHasTouchId = false;
   String name, email, password, confirmPassword;
   final formKey = GlobalKey<FormState>();
-  bool _touchID = false;
   bool saveAttempted = false;
-  final googleSignIn = GoogleSignIn();
+
+  bool _checkBio = false;
+  bool _isBioFinger = false;
+
+  void _checkBiometrics() async {
+    try {
+      final bio = await localAuth.canCheckBiometrics;
+      setState(() {
+        _checkBio = bio;
+        print('Biometrics = $_checkBio');
+      });
+    } catch (e) {}
+  }
+
+  void _listBioAndFindFingerType() async {
+    List<BiometricType> _listType;
+    try{
+      _listType = await localAuth.getAvailableBiometrics();
+    } on PlatformException catch (e) {
+      print(e.message);
+    }
+    print('List Biometrics = $_listType');
+
+    if (_listType.contains(BiometricType.fingerprint)) {
+      setState(() {
+        _isBioFinger = true;
+      });
+    }
+    print('Fingerprint is $_isBioFinger');
+  }
+
+  void _startAuth() async {
+    bool _isAuthenticated = false;
+    AndroidAuthMessages _msg = AndroidAuthMessages(
+      signInTitle: 'Sign In To Enter',
+      cancelButton: 'Cancel',
+    );
+
+    try {
+      _isAuthenticated = await  localAuth.authenticateWithBiometrics(
+        localizedReason: 'Scan your fingerprint',
+        useErrorDialogs: true,
+        stickyAuth: true,  // native process
+        androidAuthStrings: _msg,
+      );
+    } on PlatformException catch (e) {
+      print(e.message);
+    }
+
+    if (_isAuthenticated) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => MyHomePage()));
+    }
+  }
 
   void _signIn({String email, String password}) {
     _auth
@@ -70,12 +115,11 @@ class _LoginPageState extends State<LoginPage>
         .then((authResult) {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (BuildContext context) {
-        return MyHomePage(
-          user: authResult.user,
-          wantsTouchId: _touchID,
-          password: password,
-        );
-      }));
+            return MyHomePage(
+              user: authResult.user,
+              password: password,
+            );
+          }));
     }).catchError((e) {
       print(e);
       print(e.code);
@@ -106,12 +150,11 @@ class _LoginPageState extends State<LoginPage>
         .then((authResult) {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (BuildContext context) {
-        return MyHomePage(
-          user: authResult.user,
-          wantsTouchId: _touchID,
-          password: password,
-        );
-      }));
+            return MyHomePage(
+              user: authResult.user,
+              password: password,
+            );
+          }));
       print('Yay! ${authResult.user}');
     }).catchError((e) {
       print(e);
@@ -254,7 +297,8 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
 
-    getSecureStorage();
+    _checkBiometrics();
+    _listBioAndFindFingerType();
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -264,38 +308,6 @@ class _LoginPageState extends State<LoginPage>
     _pageController = PageController();
   }
 
-  void getSecureStorage() async {
-    final isUsingBio = await storage.read(key: 'usingBiometric');
-    setState(() {
-      userHasTouchId = isUsingBio == 'true';
-    });
-  }
-
-  void authenticate() async {
-    final canCheck = await auth.canCheckBiometrics;
-
-    if (canCheck) {
-      List<BiometricType> availableBiometrics =
-          await auth.getAvailableBiometrics();
-
-      if (Platform.isAndroid || Platform.isIOS) {
-        if (availableBiometrics.contains(BiometricType.fingerprint)) {
-          final authenticated = await auth.authenticateWithBiometrics(
-              localizedReason: 'Enable Fingerprint ID to sign in more easily');
-
-          if (authenticated) {
-            final userStoredEmail = await storage.read(key: 'email');
-            final userStoredPassword = await storage.read(key: 'password');
-
-            _signIn(email: userStoredEmail, password: userStoredPassword);
-            print('Bio checked');
-          }
-        }
-      }
-    } else {
-      print('cant check');
-    }
-  }
 
   void showInSnackBar(String value) {
     FocusScope.of(context).requestFocus(new FocusNode());
@@ -460,7 +472,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 170.0),
+                margin: EdgeInsets.only(top: 170.0, bottom: 30),
                 decoration: new BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   boxShadow: <BoxShadow>[
@@ -507,54 +519,11 @@ class _LoginPageState extends State<LoginPage>
               ),
             ],
           ),
-          userHasTouchId
-              ? InkWell(
-                  onTap: () => authenticate(),
-                  child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        border: Border.all(
-                          color: Colors.purple,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        FontAwesomeIcons.fingerprint,
-                        size: 30,
-                      )),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                      Checkbox(
-                        activeColor: Colors.orange,
-                        value: _touchID,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _touchID = newValue;
-                          });
-                        },
-                      ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Text(
-                      'Use Touch ID',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: "WorkSansSemiBold",
-                        fontSize: 16.0,
-                      ),
-                    )
-                  ],
-          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(top: 10.0, right: 30.0),
+                padding: EdgeInsets.only(top: 0.0, right: 30.0),
                 child: GestureDetector(
                   onTap: () => _signInFacebook(),
                   child: Container(
@@ -570,36 +539,26 @@ class _LoginPageState extends State<LoginPage>
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(top: 10.0),
-                child: GestureDetector(
-                  onTap: () {
-                    signInGoogle().whenComplete(() async {
-                      User user = await FirebaseAuth.instance.currentUser;
-
-                      Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (BuildContext context) {
-                        return MyHomePage(
-                          user: user,
-                          wantsTouchId: _touchID,
-                          password: password,
-                        );
-                      }));
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(20.0),
-                    decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
+              GestureDetector(
+                onTap: () {
+                  _startAuth();
+                },
+                child: Container(
+                    decoration: BoxDecoration(
                       color: Colors.white,
+                      border: Border.all(
+                        color: Colors.transparent,
+                        width: 2.0,
+                      ),
+                      borderRadius: BorderRadius.circular(40.0),
                     ),
-                    child: new Icon(
-                      FontAwesomeIcons.google,
-                      color: Color(0xFF0084ff),
-                    ),
-                  ),
-                ),
-              ),
+                    padding: EdgeInsets.all(15.0),
+                    child: Icon(
+                      FontAwesomeIcons.fingerprint,
+                      color: Colors.deepPurpleAccent.shade700,
+                      size: 30,
+                    )),
+              )
             ],
           ),
         ],
@@ -877,27 +836,6 @@ class _LoginPageState extends State<LoginPage>
     });
   }
 
-  Future<String> signInGoogle() async {
-    GoogleSignInAccount googleSignInAccountAcc = await googleSignIn.signIn();
-
-    if (GoogleSignInAccount != null) {
-      GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccountAcc.authentication;
-
-      AuthCredential credential = GoogleAuthProvider.getCredential(
-          idToken: googleSignInAuthentication.idToken,
-          accessToken: googleSignInAuthentication.accessToken);
-
-      UserCredential result = await _auth.signInWithCredential(credential);
-
-      User user = await _auth.currentUser;
-      print(user.uid);
-
-      return Future.value('true');
-    }
-    return 'Signed in via google account is completed';
-  }
-
   void _signInFacebook() async {
     FacebookLogin facebookLogin = FacebookLogin();
 
@@ -911,12 +849,11 @@ class _LoginPageState extends State<LoginPage>
       _auth.signInWithCredential(credential).then((authResult) =>
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (BuildContext context) {
-            return MyHomePage(
-              user: authResult.user,
-              wantsTouchId: _touchID,
-              password: password,
-            );
-          })));
+                return MyHomePage(
+                  user: authResult.user,
+                  password: password,
+                );
+              })));
     }
   }
 }
