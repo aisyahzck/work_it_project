@@ -41,9 +41,7 @@ This Service may contain links to other sites. If you click on a third-party lin
 
 **Credits**
 
-Freepik 
-Sabin Bajracharya 
-huextrat
+Freepik
 
 
 

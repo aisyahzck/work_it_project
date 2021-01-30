@@ -1,3 +1,4 @@
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -17,7 +18,6 @@ import 'package:work_it_project/todo/page/detail_screen.dart';
 import 'package:work_it_project/todo/component/todo_badge.dart';
 import 'package:work_it_project/todo/page/privacy_policy.dart';
 import 'package:work_it_project/todo/model/data/choice_card.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -52,7 +52,9 @@ class MyHomePage extends StatefulWidget {
   final User user;
   final String password;
 
-  MyHomePage({Key key, this.title, @required this.user, @required this.password}) : super(key: key);
+  MyHomePage(
+      {Key key, this.title, @required this.user, @required this.password})
+      : super(key: key);
 
   final String title;
 
@@ -66,7 +68,6 @@ class MyHomePage extends StatefulWidget {
   }
 
   String currentDay(BuildContext context) {
-
     return DateTimeUtils.currentDay;
   }
 
@@ -85,9 +86,24 @@ class _MyHomePageState extends State<MyHomePage>
   final LocalAuthentication auth = LocalAuthentication();
   User user = FirebaseAuth.instance.currentUser;
 
+  BannerAd  _bannerAd;
+
+  BannerAd createBannerAd() {
+    return BannerAd(
+        adUnitId: BannerAd.testAdUnitId,
+        size: AdSize.smartBanner,
+        listener: (MobileAdEvent event) {
+          print ('Banner Event $event');
+        }
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+
+    FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-7692392785473819~6925991494');
+    _bannerAd = createBannerAd()..load();
 
     _controller = AnimationController(
       vsync: this,
@@ -100,164 +116,170 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
+    _bannerAd.show();
     return ScopedModelDescendant<TodoListModel>(
         builder: (BuildContext context, Widget child, TodoListModel model) {
-      var _isLoading = model.isLoading;
-      var _tasks = model.tasks;
-      var _todos = model.todos;
-      var backgroundColor = _tasks.isEmpty || _tasks.length == _currentPageIndex
-          ? Colors.blueGrey
-          : ColorUtils.getColorFrom(id: _tasks[_currentPageIndex].color);
-      if (!_isLoading) {
-        // move the animation value towards upperbound only when loading is complete
-        _controller.forward();
-      }
-      return GradientBackground(
-        color: backgroundColor,
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: AppBar(
-            centerTitle: true,
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-            actions: <Widget> [
-              PopupMenuButton<Choice>(
-                onSelected: (choice) {
-                  setState(() async {
-                    if (choice.title == 'Privacy Policy'){
-                      print(' USER IS $user');
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              PrivacyPolicyScreen()));
-                    } else if (choice.title == 'Sign Out'){
-                      // sign out
-                      print('SIGN OUT BUTTON');
-                      FirebaseAuth.instance.signOut().then((value) => Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              LoginPage())));
-                      print('USER IS $user');
-                      if (user == null) {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                LoginPage()));
-                      }
-                    }
-                  });
-                },
-                itemBuilder: (BuildContext context) {
-                  return choices.map((Choice choice) {
-                    return PopupMenuItem<Choice>(
-                      value: choice,
-                      child: Text(choice.title),
-                    );
-                  }).toList();
-                },
-              ),
-            ],
-          ),
-          body: _isLoading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.0,
-                    valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          var _isLoading = model.isLoading;
+          var _tasks = model.tasks;
+          var _todos = model.todos;
+          var backgroundColor = _tasks.isEmpty ||
+              _tasks.length == _currentPageIndex
+              ? Colors.blueGrey
+              : ColorUtils.getColorFrom(id: _tasks[_currentPageIndex].color);
+          if (!_isLoading) {
+            // move the animation value towards upperbound only when loading is complete
+            _controller.forward();
+          }
+          return GradientBackground(
+            color: backgroundColor,
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                centerTitle: true,
+                elevation: 0.0,
+                backgroundColor: Colors.transparent,
+                actions: <Widget>[
+                  PopupMenuButton<Choice>(
+                    onSelected: (choice) {
+                      setState(() async {
+                        if (choice.title == 'Privacy Policy') {
+                          print(' USER IS $user');
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  PrivacyPolicyScreen()));
+                        } else if (choice.title == 'Sign Out') {
+                          // sign out
+                          print('SIGN OUT BUTTON');
+                          FirebaseAuth.instance.signOut().then((value) =>
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          LoginPage())));
+                          print('USER IS $user');
+                          if (user == null) {
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (BuildContext context) =>
+                                        LoginPage()));
+                          }
+                        }
+                      });
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return choices.map((Choice choice) {
+                        return PopupMenuItem<Choice>(
+                          value: choice,
+                          child: Text(choice.title),
+                        );
+                      }).toList();
+                    },
                   ),
-                )
-              : FadeTransition(
-                  opacity: _animation,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        margin: EdgeInsets.only(top: 0.0, left: 56.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            // ShadowImage(),
-                            Container(
-                              // margin: EdgeInsets.only(top: 22.0),
-                              child: Text(
-                                '${widget.currentDay(context)}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headline
-                                    .copyWith(color: Colors.white),
-                              ),
+                ],
+              ),
+              body: _isLoading
+                  ? Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 1.0,
+                  valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+                  : FadeTransition(
+                opacity: _animation,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(top: 0.0, left: 56.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // ShadowImage(),
+                          Container(
+                            child: Text(
+                              '${widget.currentDay(context)}',
+                              style: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .headline
+                                  .copyWith(color: Colors.white),
                             ),
-                            Text(
-                              '${DateTimeUtils.currentDate} ${DateTimeUtils.currentMonth}',
-                              style: Theme.of(context).textTheme.title.copyWith(
-                                  color: Colors.white.withOpacity(0.7)),
-                            ),
-                            Container(height: 16.0),
-                            Text(
-                              'You have ${_todos.where((todo) => todo.isCompleted == 0).length} tasks to complete',
-                              style: Theme.of(context).textTheme.body1.copyWith(
-                                  color: Colors.white.withOpacity(0.7)),
-                            ),
-                            Container(
-                              height: 16.0,
-                            )
-                            // Container(
-                            //   margin: EdgeInsets.only(top: 42.0),
-                            //   child: Text(
-                            //     'TODAY : FEBURARY 13, 2019',
-                            //     style: Theme.of(context)
-                            //         .textTheme
-                            //         .subtitle
-                            //         .copyWith(color: Colors.white.withOpacity(0.8)),
-                            //   ),
-                            // ),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            '${DateTimeUtils.currentDate} ${DateTimeUtils
+                                .currentMonth}',
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .title
+                                .copyWith(
+                                color: Colors.white.withOpacity(0.7)),
+                          ),
+                          Container(height: 16.0),
+                          Text(
+                            'You have ${_todos
+                                .where((todo) => todo.isCompleted == 0)
+                                .length} tasks to complete',
+                            style: Theme
+                                .of(context)
+                                .textTheme
+                                .body1
+                                .copyWith(
+                                color: Colors.white.withOpacity(0.7)),
+                          ),
+                          Container(
+                            height: 16.0,
+                          )
+                        ],
                       ),
-                      Expanded(
-                        key: _backdropKey,
-                        flex: 1,
-                        child: NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (notification is ScrollEndNotification) {
-                              print(
-                                  "ScrollNotification = ${_pageController.page}");
-                              var currentPage =
-                                  _pageController.page.round().toInt();
-                              if (_currentPageIndex != currentPage) {
-                                setState(() => _currentPageIndex = currentPage);
-                              }
+                    ),
+                    Expanded(
+                      key: _backdropKey,
+                      flex: 1,
+                      child: NotificationListener<ScrollNotification>(
+                        onNotification: (notification) {
+                          if (notification is ScrollEndNotification) {
+                            print(
+                                "ScrollNotification = ${_pageController.page}");
+                            var currentPage =
+                            _pageController.page.round().toInt();
+                            if (_currentPageIndex != currentPage) {
+                              setState(() => _currentPageIndex = currentPage);
+                            }
+                          }
+                        },
+                        child: PageView.builder(
+                          controller: _pageController,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index == _tasks.length) {
+                              return AddPageCard(
+                                color: Colors.blueGrey,
+                              );
+                            } else {
+                              return TaskCard(
+                                backdropKey: _backdropKey,
+                                color: ColorUtils.getColorFrom(
+                                    id: _tasks[index].color),
+                                getHeroIds: widget._generateHeroIds,
+                                getTaskCompletionPercent:
+                                model.getTaskCompletionPercent,
+                                getTotalTodos: model.getTotalTodosFrom,
+                                task: _tasks[index],
+                              );
                             }
                           },
-                          child: PageView.builder(
-                            controller: _pageController,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (index == _tasks.length) {
-                                return AddPageCard(
-                                  color: Colors.blueGrey,
-                                );
-                              } else {
-                                return TaskCard(
-                                  backdropKey: _backdropKey,
-                                  color: ColorUtils.getColorFrom(
-                                      id: _tasks[index].color),
-                                  getHeroIds: widget._generateHeroIds,
-                                  getTaskCompletionPercent:
-                                      model.getTaskCompletionPercent,
-                                  getTotalTodos: model.getTotalTodosFrom,
-                                  task: _tasks[index],
-                                );
-                              }
-                            },
-                            itemCount: _tasks.length + 1,
-                          ),
+                          itemCount: _tasks.length + 1,
                         ),
                       ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 32.0),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(bottom: 32.0),
+                    ),
+                  ],
                 ),
-        ),
-      );
-    });
+              ),
+            ),
+          );
+        });
   }
 
   @override
@@ -344,11 +366,14 @@ class TaskCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         final RenderBox renderBox =
-            backdropKey.currentContext.findRenderObject();
+        backdropKey.currentContext.findRenderObject();
         var backDropHeight = renderBox.size.height;
         var bottomOffset = 60.0;
         var horizontalOffset = 52.0;
-        var topOffset = MediaQuery.of(context).size.height - backDropHeight;
+        var topOffset = MediaQuery
+            .of(context)
+            .size
+            .height - backDropHeight;
 
         var rect = RelativeRect.fromLTRB(
             horizontalOffset, topOffset, horizontalOffset, bottomOffset);
@@ -398,7 +423,8 @@ class TaskCard extends StatelessWidget {
                   tag: heroIds.remainingTaskId,
                   child: Text(
                     "${getTotalTodos(task)} Task",
-                    style: Theme.of(context)
+                    style: Theme
+                        .of(context)
                         .textTheme
                         .body1
                         .copyWith(color: Colors.grey[500]),
@@ -409,7 +435,8 @@ class TaskCard extends StatelessWidget {
                 child: Hero(
                   tag: heroIds.titleId,
                   child: Text(task.name,
-                      style: Theme.of(context)
+                      style: Theme
+                          .of(context)
                           .textTheme
                           .title
                           .copyWith(color: Colors.black54)),

@@ -14,12 +14,8 @@ class DBProvider {
   static final DBProvider db = DBProvider._();
 
   var todos = [
-    Todo("Vegetables", parent: '1',),
-    Todo("Birthday gift", parent: '1',),
-    Todo("Chocolate cookies", parent: '1', isCompleted: 1),
-    Todo("20 pushups", parent: '2',),
-    Todo("Tricep", parent: '2',),
-    Todo("15 burpees (3 sets)", parent: '2',),
+    Todo("Chocolate", parent: '1',),
+    Todo("20 burpees", parent: '2',),
   ];
 
   var tasks = [
