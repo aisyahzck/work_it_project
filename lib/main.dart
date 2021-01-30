@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'file:///C:/Users/sitia/AndroidStudioProjects/work_it_project/lib/login.dart';
+import 'package:work_it_project/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:work_it_project/todo/scopedmodel/todo_list_model.dart';
