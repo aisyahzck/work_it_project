@@ -10,7 +10,7 @@ User can sign in via:
 If fingerprint authentication is enabled on the phone, you can sign in without signing up first.
 
 Login page:
-<p><img src="https://github.com/aisyahzck/work_it_project/blob/master/images/login.png?raw=true"/></p>
+<p><img src="https://github.com/aisyahzck/work_it_project/blob/master/images/login.png?raw=true"/> </p>
 
 
 
