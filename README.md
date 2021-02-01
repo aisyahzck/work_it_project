@@ -8,9 +8,17 @@ User can sign in via:
 2) Facebook Account
 
 If fingerprint authentication is enabled on the phone, you can sign in without signing up first.
+<p><p>
 
-Login page:
-<p><img src="https://github.com/aisyahzck/work_it_project/blob/master/images/login.png?raw=true"/> </p>
+Login Page:
+<p><img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png"/></p>
+<p><p>
+  
+Sign Up Page:
+<p><img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png"/></p>
+<p><p>
+  
+
 
 
 
