@@ -9,5 +9,8 @@ User can sign in via:
 
 If fingerprint authentication is enabled on the phone, you can sign in without signing up first.
 
+Login/Sign Up page:
+![alt login] (https://github.com/aisyahzck/work_it_project/blob/master/images/login.png)
+
 
 
