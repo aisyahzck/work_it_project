@@ -19,7 +19,7 @@ If fingerprint authentication is enabled on the phone, you can login using it wi
 <img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/signup.png" width="200" height="422"/>
 
 
-<b>After success authentication: </b>
+<b>Home Page: </b>
 
 <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/home.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/list2.png" width="200" height="422"/> 
 
