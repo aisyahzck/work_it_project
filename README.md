@@ -18,18 +18,13 @@ Login Page:
     <img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png" width="200" height="422">
   </div>
   <div class="column">
-    <img src="img_forest.jpg" alt="Forest" style="width:100%">
+    <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/fingerprint.png" width="200" height="422">
   </div>
   <div class="column">
     <img src="img_mountains.jpg" alt="Mountains" style="width:100%">
   </div>
 </div>
 
-
-<p><img src="/>
-
-<img src="https://github.com/aisyahzck/work_it_project/blob/master/images/fingerprint.png" width="200" height="422"/></p>
-<p><p>
   
 
 
