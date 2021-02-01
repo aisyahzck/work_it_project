@@ -12,10 +12,8 @@ If fingerprint authentication is enabled on the phone, you can sign in without s
 
 Login Page:
 <p><img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png"/></p>
-<p><p>
-  
-Sign Up Page:
-<p><img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png"/></p>
+
+<p><img src="https://github.com/aisyahzck/work_it_project/blob/master/images/fingerprint.png?raw=true width="200" height="422"/></p>
 <p><p>
   
 
