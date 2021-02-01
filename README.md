@@ -10,20 +10,20 @@ User can sign in via:
 If fingerprint authentication is enabled on the phone, you can sign in without signing up first.
 <p><p>
  
-
-Login Page:
+<center>
+<b>Login Page:</b>
 
 <img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/login.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/fingerprint.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/fb.png" width="200" height="422"/>  
 
-Sign Up Page: 
+<b>Sign Up Page: </b> 
 
 <img src="https://raw.githubusercontent.com/aisyahzck/work_it_project/master/images/signup.png" width="200" height="422"/>
 
 
-After success authentication:
+<b>After success authentication: </b>
 
 <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/homepage.png" width="200" height="422"/> 
-
+</center>
   
 
 
