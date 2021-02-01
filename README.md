@@ -6,7 +6,7 @@ User can sign in via:
 1) Email
 2) Facebook Account
 
-If fingerprint authentication is enabled on the phone, you can sign in without signing up first.
+If fingerprint authentication is enabled on the phone, you can login using it without signing up first.
 <p><p>
  
 
@@ -24,4 +24,4 @@ If fingerprint authentication is enabled on the phone, you can sign in without s
 <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/home.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/list2.png" width="200" height="422"/> 
 
 <h2>Details</h2>
-This app has Firebase and internal database as its backends.
+This app has <b>Firebase</b> and internal database as its backends.
