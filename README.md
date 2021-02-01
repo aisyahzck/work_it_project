@@ -21,7 +21,7 @@ If fingerprint authentication is enabled on the phone, you can sign in without s
 
 <b>After success authentication: </b>
 
-<img src="https://github.com/aisyahzck/work_it_project/blob/master/images/list.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/list2.png" width="200" height="422"/> 
+<img src="https://github.com/aisyahzck/work_it_project/blob/master/images/home.png" width="200" height="422"/>  <img src="https://github.com/aisyahzck/work_it_project/blob/master/images/list2.png" width="200" height="422"/> 
 
 <h2>Details</h2>
 This app has Firebase and internal database as its backends.
