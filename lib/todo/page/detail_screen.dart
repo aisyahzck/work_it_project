@@ -220,6 +220,7 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
               ]),
             ),
             floatingActionButton: FloatingActionButton(
+              elevation: 0.0,
               heroTag: 'fab_new_task',
               onPressed: () {
                 Navigator.push(

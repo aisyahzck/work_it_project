@@ -1,4 +1,3 @@
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -22,6 +21,9 @@ import 'package:work_it_project/todo/model/data/choice_card.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
+
+
   @override
   Widget build(BuildContext context) {
     var app = MaterialApp(
@@ -51,6 +53,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   final User user;
   final String password;
+
 
   MyHomePage(
       {Key key, this.title, @required this.user, @required this.password})
@@ -86,24 +89,10 @@ class _MyHomePageState extends State<MyHomePage>
   final LocalAuthentication auth = LocalAuthentication();
   User user = FirebaseAuth.instance.currentUser;
 
-  BannerAd  _bannerAd;
-
-  BannerAd createBannerAd() {
-    return BannerAd(
-        adUnitId: BannerAd.testAdUnitId,
-        size: AdSize.smartBanner,
-        listener: (MobileAdEvent event) {
-          print ('Banner Event $event');
-        }
-    );
-  }
 
   @override
   void initState() {
     super.initState();
-
-    FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-7692392785473819~6925991494');
-    _bannerAd = createBannerAd()..load();
 
     _controller = AnimationController(
       vsync: this,
@@ -116,7 +105,6 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
-    _bannerAd.show();
     return ScopedModelDescendant<TodoListModel>(
         builder: (BuildContext context, Widget child, TodoListModel model) {
           var _isLoading = model.isLoading;

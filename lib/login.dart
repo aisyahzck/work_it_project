@@ -11,6 +11,7 @@ import 'package:work_it_project/theme.dart' as Theme;
 import 'package:work_it_project/todo/homepage.dart';
 import 'package:work_it_project/bubble_indication_painter.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 
 class LoginPage extends StatefulWidget {
   final Function toggleView;
@@ -51,13 +52,24 @@ class _LoginPageState extends State<LoginPage>
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final LocalAuthentication localAuth = LocalAuthentication();
-  bool userHasTouchId = false;
   String name, email, password, confirmPassword;
   final formKey = GlobalKey<FormState>();
   bool saveAttempted = false;
 
   bool _checkBio = false;
   bool _isBioFinger = false;
+
+  BannerAd  _bannerAd;
+
+  BannerAd createBannerAd() {
+    return BannerAd(
+        adUnitId: BannerAd.testAdUnitId,
+        size: AdSize.smartBanner,
+        listener: (MobileAdEvent event) {
+          print ('Banner Event $event');
+        }
+    );
+  }
 
   void _checkBiometrics() async {
     try {
@@ -183,6 +195,7 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
+    _bannerAd.show();
     return new Scaffold(
       key: _scaffoldKey,
       body: NotificationListener<OverscrollIndicatorNotification>(
@@ -296,6 +309,9 @@ class _LoginPageState extends State<LoginPage>
   @override
   void initState() {
     super.initState();
+
+    FirebaseAdMob.instance.initialize(appId: 'ca-app-pub-7692392785473819~6925991494');
+    _bannerAd = createBannerAd()..load();
 
     _checkBiometrics();
     _listBioAndFindFingerType();
