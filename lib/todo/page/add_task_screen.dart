@@ -118,7 +118,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   if (newTask.isEmpty) {
                     final snackBar = SnackBar(
                       content: Text(
-                          'Ummm... It seems that you are trying to add an invisible task which is not allowed in this realm.'),
+                          'Sorry, empty category is not allowed. Please enter your category.'),
                       backgroundColor: taskColor,
                     );
                     Scaffold.of(context).showSnackBar(snackBar);
@@ -136,6 +136,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             },
           ),
         );
+
       },
     );
   }

@@ -236,6 +236,18 @@ class _DetailScreenState extends State<DetailScreen> with SingleTickerProviderSt
               foregroundColor: Colors.white,
               child: Icon(Icons.add),
             ),
+            bottomNavigationBar:
+            BottomAppBar(
+              elevation: 0.0,
+              child: Container(
+                color: Colors.transparent,
+                height: 45.0,
+                // child: Row(
+                //   crossAxisAlignment: CrossAxisAlignment.center,
+                //
+                // ),
+              ),
+            ),
           ),
         );
       },
@@ -276,7 +288,7 @@ class SimpleAlertDialog extends StatelessWidget {
                 child: ListBody(
                   children: <Widget>[
                     Text(
-                        'This is a one way street! Deleting this will remove all the task assigned in this card.'),
+                        'Are you sure? Deleting this will remove all the task assigned in this card.'),
                   ],
                 ),
               ),

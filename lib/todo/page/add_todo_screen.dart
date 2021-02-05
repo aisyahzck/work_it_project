@@ -136,7 +136,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                   if (newTask.isEmpty) {
                     final snackBar = SnackBar(
                       content: Text(
-                          'Ummm... It seems that you are trying to add an invisible task which is not allowed in this realm.'),
+                          'Sorry, task cannot be empty. Please enter your task.'),
                       backgroundColor: _color,
                     );
                     Scaffold.of(context).showSnackBar(snackBar);

@@ -260,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage>
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.only(bottom: 32.0),
+                      margin: EdgeInsets.only(bottom: 60.0),
                     ),
                   ],
                 ),

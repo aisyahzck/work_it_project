@@ -68,7 +68,7 @@ class _EditCardScreenState extends State<EditTaskScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Category will help you group related task!',
+                  'Category will help you group related task.',
                   style: TextStyle(
                       color: Colors.black38,
                       fontWeight: FontWeight.w600,
@@ -130,7 +130,7 @@ class _EditCardScreenState extends State<EditTaskScreen> {
                   if (newTask.isEmpty) {
                     final snackBar = SnackBar(
                       content: Text(
-                          'Ummm... It seems that you are trying to add an invisible task which is not allowed in this realm.'),
+                          'Sorry, empty value is not allowed. Please enter value.'),
                       backgroundColor: taskColor,
                     );
                     Scaffold.of(context).showSnackBar(snackBar);
