@@ -5,6 +5,7 @@ Sign up before starting using the app.
 User can sign in via:
 1) Email
 2) Facebook Account
+3) Fingerprint Scan
 
 If fingerprint authentication is enabled on the phone, you can login using it without signing up first.
 <p><p>
